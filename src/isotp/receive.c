@@ -4,8 +4,6 @@
 #include <bitfield/bitfield.h>
 #include <string.h>
 
-#define ARBITRATION_ID_OFFSET 0x8
-
 static void isotp_complete_receive(IsoTpReceiveHandle* handle, IsoTpMessage* message) {
     if(handle->message_received_callback != NULL) {
         handle->message_received_callback(message);
@@ -32,14 +30,15 @@ bool isotp_send_flow_control_frame(IsoTpShims* shims, IsoTpMessage* message) {
         return false;
     }
 
-    shims->send_can_message(message->arbitration_id - ARBITRATION_ID_OFFSET, can_data,
-            shims->frame_padding ? 8 : 1 + message->size);
+    shims->send_can_message(message->arbitration_id, can_data,
+            shims->frame_padding ? 8 : 1 + message->size, shims->private_data);
     return true;
 }
 
 
 IsoTpReceiveHandle isotp_receive(IsoTpShims* shims,
         const uint32_t arbitration_id, IsoTpMessageReceivedHandler callback) {
+    (void) shims;
     IsoTpReceiveHandle handle;
     handle.success = false;
     handle.completed = false;
@@ -110,7 +109,7 @@ IsoTpMessage isotp_continue_receive(IsoTpShims* shims,
 
             if(combined_payload == NULL) {
 		if(shims->log)
-                    shims->log("Unable to allocate memory for multi-frame response.");
+                    shims->log("Unable to allocate memory for multi-frame message.");
                 break;
             }
 
