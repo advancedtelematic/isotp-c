@@ -58,7 +58,8 @@ With your shims in hand, send an ISO-TP message:
         // You received the message! Do something with it.
     }
 
-    IsoTpSendHandle handle = isotp_send(&shims, 0x100, NULL, 0, message_sent);
+    IsoTpSendHandle message = isotp_new_send_message(0x100, data, size);
+    IsoTpSendHandle handle = isotp_send(&shims, &message, message_sent);
 
     if(handle.completed) {
         if(!handle.success) {
@@ -75,15 +76,24 @@ With your shims in hand, send an ISO-TP message:
             // this will return true when the message is completely sent (which
             // may take more than one call if it was multi frame and we're waiting
             // on flow control responses from the receiver)
-            bool complete = isotp_continue_send(&shims, &handle, 0x100, data, size);
+            if(can_get_frame(&af, &data, &size)) {
+                if(!isotp_receive_flowcontrol(&shims, &handle, af, data, size)) {
+                    // Process error
+		}
 
-            if(complete && handle.completed) {
-                if(handle.success) {
-                    // All frames of the message have now been sent, following
-                    // whatever flow control feedback it got from the receiver
-                } else {
-                    // the message was unable to be sent and we bailed - fatal
-                    // error!
+                while(handle.to_send != 0) {
+                    if(!isotp_continue_send(&shims, &handle)) {
+                        // Process error
+                    }
+                    if(handle.completed) {
+                        if(handle.success) {
+                            // All frames of the message have now been sent, following
+                            // whatever flow control feedback it got from the receiver
+                        } else {
+                            // the message was unable to be sent and we bailed - fatal
+                            // error!
+                        }
+                    }
                 }
             }
         }

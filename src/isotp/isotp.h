@@ -21,7 +21,8 @@ extern "C" {
  */
 IsoTpShims isotp_init_shims(LogShim log,
         SendCanMessageShim send_can_message,
-        SetTimerShim set_timer);
+        SetTimerShim set_timer,
+	void* send_can_private);
 
 #ifdef __cplusplus
 }

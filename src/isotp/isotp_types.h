@@ -16,6 +16,8 @@
  */
 #define PCI_NIBBLE_INDEX 0
 #define PAYLOAD_LENGTH_NIBBLE_INDEX 1
+#define SEQUENCE_NUMBER_NIBBLE_INDEX 1
+#define FLOW_CONTROL_NIBBLE_INDEX 1
 #define PAYLOAD_BYTE_INDEX 1
 
 /* Private: The default timeout to use when waiting for a response during a
@@ -69,7 +71,7 @@ typedef void (*LogShim)(const char* message, ...);
  * Returns true if the CAN message was sent successfully.
  */
 typedef bool (*SendCanMessageShim)(const uint32_t arbitration_id,
-        const uint8_t* data, const uint8_t size);
+        const uint8_t* data, const uint8_t size, void* private_data);
 
 /* Public: The type signature for a... TODO, not used yet.
  */
@@ -118,6 +120,7 @@ typedef struct {
     SendCanMessageShim send_can_message;
     SetTimerShim set_timer;
     bool frame_padding;
+    void* private_data;
 } IsoTpShims;
 
 /* Private: PCI types, for identifying each frame of an ISO-TP message.

@@ -24,6 +24,7 @@ extern "C" {
 typedef struct {
     bool completed;
     bool success;
+    int to_send;
 
     /* Private */
     uint16_t sending_arbitration_id;
@@ -31,7 +32,21 @@ typedef struct {
     IsoTpMessageSentHandler message_sent_callback;
     IsoTpCanFrameSentHandler can_frame_sent_callback;
     /* TODO going to need some state here for multi frame messages */
+    IsoTpMessage* message;
+    uint16_t payload_index;
+    uint8_t seqn;
 } IsoTpSendHandle;
+
+/* Public: Initialize a new ISO-TP message object.
+ *
+ * arbitration_id - The arbitration ID to send the message on.
+ * payload - The payload for the message. If no payload, NULL is valid is size
+ *      is also 0.
+ * size - The size of the payload, or 0 if no payload.
+ *
+ * Returns a message object to be passed to isotp_send()
+ */
+IsoTpMessage isotp_new_send_message(const uint16_t arbitration_id, const uint8_t payload[], uint16_t size);
 
 /* Public: Initiate sending a single ISO-TP message.
  *
@@ -53,12 +68,9 @@ typedef struct {
  * multi-frame messages. The 'completed' field in the returned IsoTpSendHandle
  * will be true when the message is completely sent.
  */
-IsoTpSendHandle isotp_send(IsoTpShims* shims, const uint16_t arbitration_id,
-        const uint8_t payload[], uint16_t size,
-        IsoTpMessageSentHandler callback);
+IsoTpSendHandle isotp_send(IsoTpShims* shims, IsoTpMessage* message, IsoTpMessageSentHandler callback);
 
-/* Public: Continue to send a multi-frame ISO-TP message, based on a freshly
- * received CAN message (potentially from the receiver about flow control).
+/* Public: Process control flow frame
  *
  * For a multi-frame ISO-TP message, this function must be called
  * repeatedly whenever a new CAN message is received in order to complete the
@@ -75,9 +87,22 @@ IsoTpSendHandle isotp_send(IsoTpShims* shims, const uint16_t arbitration_id,
  *      otherwise cancelled. Check the 'success' field of the handle to see if
  *      it was successful.
  */
-bool isotp_continue_send(IsoTpShims* shims, IsoTpSendHandle* handle,
+bool isotp_receive_flowcontrol(IsoTpShims* shims, IsoTpSendHandle* handle,
         const uint16_t arbitration_id, const uint8_t data[],
         const uint8_t size);
+
+/* Public: Continue sending multi-frame package based on the current state
+ *
+ * Can be called regularly or based on to_send field in handle struct.
+ *
+ * shims -  Low-level shims required to send CAN messages, etc.
+ * handle - An IsoTpSendHandle previously returned by isotp_send(...).
+ *
+ * Returns false if sending the frame failed, true otherwise. To check if
+ *      the sending of the whole message has completed and/or succeded see 
+ *      handle.completed and handle.success.
+ */
+bool isotp_continue_send(IsoTpShims* shims, IsoTpSendHandle* handle);
 
 #ifdef __cplusplus
 }
