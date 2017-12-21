@@ -160,7 +160,6 @@ bool isotp_receive_flowcontrol(IsoTpShims* shims, IsoTpSendHandle* handle,
 bool isotp_continue_send(IsoTpShims* shims, IsoTpSendHandle* handle) {
 	uint8_t frame_len;
 	bool is_last = false;
-	int i;
 	uint8_t can_data[CAN_MESSAGE_BYTE_SIZE] = {0};
 
 	if(handle->to_send == 0)
@@ -192,7 +191,7 @@ bool isotp_continue_send(IsoTpShims* shims, IsoTpSendHandle* handle) {
 		is_last = false;
 	}
 
-	memcpy(&can_data[1], &handle->message[handle->payload_index], frame_len);
+	memcpy(&can_data[1], &handle->message->payload[handle->payload_index], frame_len);
 
 	if(!shims->send_can_message(handle->sending_arbitration_id, can_data, frame_len+1, shims->private_data)) {
 		if(shims->log)
