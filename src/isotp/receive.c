@@ -1,5 +1,6 @@
 #include <isotp/receive.h>
 #include <isotp/allocate.h>
+#include <isotp/protocol.h>
 #include <isotp/send.h>
 #include <bitfield/bitfield.h>
 #include <string.h>
@@ -30,7 +31,7 @@ bool isotp_send_flow_control_frame(IsoTpShims* shims, IsoTpMessage* message) {
         return false;
     }
 
-    shims->send_can_message(message->arbitration_id, can_data,
+    shims->send_can_message(protocol_swap_sa_ta(message->arbitration_id), can_data,
             shims->frame_padding ? 8 : 1 + message->size, shims->private_data);
     return true;
 }
