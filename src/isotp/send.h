@@ -46,7 +46,7 @@ typedef struct {
  *
  * Returns a message object to be passed to isotp_send()
  */
-IsoTpMessage isotp_new_send_message(const uint16_t arbitration_id, const uint8_t payload[], uint16_t size);
+IsoTpMessage isotp_new_send_message(uint16_t arbitration_id, const uint8_t payload[], uint16_t size);
 
 /* Public: Initiate sending a single ISO-TP message.
  *
@@ -88,8 +88,8 @@ IsoTpSendHandle isotp_send(IsoTpShims* shims, IsoTpMessage* message, IsoTpMessag
  *      it was successful.
  */
 bool isotp_receive_flowcontrol(IsoTpShims* shims, IsoTpSendHandle* handle,
-        const uint16_t arbitration_id, const uint8_t data[],
-        const uint8_t size);
+        uint16_t arbitration_id, const uint8_t data[],
+        uint8_t size);
 
 /* Public: Continue sending multi-frame package based on the current state
  *

@@ -46,8 +46,8 @@ void debug(const char* format, ...) {
     va_end(args);
 }
 
-bool mock_send_can(const uint32_t arbitration_id, const uint8_t* data,
-        const uint8_t size) {
+bool mock_send_can(uint32_t arbitration_id, const uint8_t* data,
+        uint8_t size) {
     can_frame_was_sent = true;
     last_can_frame_sent_arb_id = arbitration_id;
     last_can_payload_size = size;
@@ -70,7 +70,7 @@ void message_received(const IsoTpMessage* message) {
     }
 }
 
-void message_sent(const IsoTpMessage* message, const bool success) {
+void message_sent(const IsoTpMessage* message, bool success) {
     if(success) {
         debug("Sent ISO-TP message:");
     } else {
@@ -88,8 +88,9 @@ void message_sent(const IsoTpMessage* message, const bool success) {
     }
 }
 
-void can_frame_sent(const uint32_t arbitration_id, const uint8_t* payload,
-        const uint8_t size) {
+void can_frame_sent(uint32_t arbitration_id, const uint8_t* payload,
+        uint8_t size) {
+    (void)payload;
     debug("Sent CAN Frame with arb ID 0x%x and %d bytes", arbitration_id, size);
 }
 
