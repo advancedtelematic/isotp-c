@@ -85,7 +85,6 @@ IsoTpSendHandle isotp_send_multi_frame(IsoTpShims* shims, IsoTpMessage* message,
     handle.to_send = 0;
     handle.message_sent_callback = callback;
     handle.sending_arbitration_id = message->arbitration_id;
-    handle.receiving_arbitration_id = protocol_swap_sa_ta(message->arbitration_id);
 
     return handle;
 }
@@ -110,16 +109,6 @@ IsoTpSendHandle isotp_send(IsoTpShims* shims, IsoTpMessage* message, IsoTpMessag
 bool isotp_receive_flowcontrol(IsoTpShims* shims, IsoTpSendHandle* handle,
         const uint16_t arbitration_id, const uint8_t data[],
         const uint8_t size) {
-    /* TODO this will need to be tested when we add multi-frame support,
-       which is when it'll be necessary to pass in CAN messages to SENDING
-       handles. */
-    if(handle->receiving_arbitration_id != arbitration_id) {
-        if(shims->log) {
-            shims->log("The arb ID 0x%x doesn't match the expected tx continuation ID 0x%x",
-                    arbitration_id, handle->receiving_arbitration_id);
-        }
-        return false;
-    }
 
     if(size < 3 || get_nibble(data, 3, PCI_NIBBLE_INDEX) != PCI_FLOW_CONTROL_FRAME) {
         if(shims->log) {

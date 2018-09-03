@@ -22,7 +22,7 @@ bool isotp_handle_multi_frame(IsoTpReceiveHandle* handle, IsoTpMessage* message)
     return true;
 }
 
-bool isotp_send_flow_control_frame(IsoTpShims* shims, IsoTpMessage* message) {
+bool isotp_send_flow_control_frame(IsoTpShims* shims, uint32_t tx_id, uint16_t size) {
     uint8_t can_data[CAN_MESSAGE_BYTE_SIZE] = {0};
 
     if(!set_nibble(PCI_NIBBLE_INDEX, PCI_FLOW_CONTROL_FRAME, can_data, sizeof(can_data))) {
@@ -31,19 +31,20 @@ bool isotp_send_flow_control_frame(IsoTpShims* shims, IsoTpMessage* message) {
         return false;
     }
 
-    shims->send_can_message(protocol_swap_sa_ta(message->arbitration_id), can_data,
-            shims->frame_padding ? 8 : 1 + message->size, shims->private_data);
+    shims->send_can_message(tx_id, can_data,
+            shims->frame_padding ? 8 : 1 + size, shims->private_data);
     return true;
 }
 
 
 IsoTpReceiveHandle isotp_receive(IsoTpShims* shims,
-        const uint32_t arbitration_id, IsoTpMessageReceivedHandler callback) {
+        const uint32_t tx_id, const uint32_t rx_id, IsoTpMessageReceivedHandler callback) {
     (void) shims;
     IsoTpReceiveHandle handle;
     handle.success = false;
     handle.completed = false;
-    handle.arbitration_id = arbitration_id;
+    handle.tx_id = tx_id;
+    handle.rx_id = rx_id;
     handle.message_received_callback = callback;
 
     return handle;
@@ -58,7 +59,7 @@ IsoTpMessage isotp_continue_receive(IsoTpShims* shims,
         return message;
     }
 
-    if(handle->arbitration_id != arbitration_id) {
+    if(handle->rx_id != arbitration_id) {
         if(shims->log != NULL)  {
             /* You may turn this on for debugging, but in normal operation it's
                very noisy if you are passing all received CAN messages to this
@@ -122,7 +123,7 @@ IsoTpMessage isotp_continue_receive(IsoTpShims* shims,
             message.multi_frame = true;
             handle->success = false;
             handle->completed = false;
-            isotp_send_flow_control_frame(shims, &message);
+            isotp_send_flow_control_frame(shims, handle->tx_id, message.size);
             break;
         }
         case PCI_CONSECUTIVE_FRAME: {
