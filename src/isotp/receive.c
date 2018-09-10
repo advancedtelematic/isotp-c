@@ -5,6 +5,7 @@
 #include <bitfield/bitfield.h>
 #include <string.h>
 
+#define ISOTP_CF_GAP 20 //ms
 static void isotp_complete_receive(IsoTpReceiveHandle* handle, IsoTpMessage* message) {
     if(handle->message_received_callback != NULL) {
         handle->message_received_callback(message);
@@ -23,7 +24,7 @@ bool isotp_handle_multi_frame(IsoTpReceiveHandle* handle, IsoTpMessage* message)
 }
 
 bool isotp_send_flow_control_frame(IsoTpShims* shims, uint32_t tx_id, uint16_t size) {
-    uint8_t can_data[CAN_MESSAGE_BYTE_SIZE] = {0};
+    uint8_t can_data[CAN_MESSAGE_BYTE_SIZE] = {0, 0, ISOTP_CF_GAP};
 
     if(!set_nibble(PCI_NIBBLE_INDEX, PCI_FLOW_CONTROL_FRAME, can_data, sizeof(can_data))) {
 	if(shims->log)
