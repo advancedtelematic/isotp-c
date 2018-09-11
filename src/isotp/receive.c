@@ -128,8 +128,8 @@ IsoTpMessage isotp_continue_receive(IsoTpShims* shims,
             break;
         }
         case PCI_CONSECUTIVE_FRAME: {
-            uint8_t start_index = handle->received_buffer_size;
-            uint8_t remaining_bytes = handle->incoming_message_size - start_index;
+            uint16_t start_index = handle->received_buffer_size;
+            uint16_t remaining_bytes = handle->incoming_message_size - start_index;
             message.multi_frame = true;
 
             if(remaining_bytes > 7) {
