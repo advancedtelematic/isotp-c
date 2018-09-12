@@ -25,6 +25,8 @@ typedef struct {
     bool completed;
     bool success;
     int to_send;
+    int gap_ms;
+    int gap_us;
 
     /* Private */
     uint16_t sending_arbitration_id;

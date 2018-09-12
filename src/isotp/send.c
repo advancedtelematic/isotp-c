@@ -121,11 +121,17 @@ bool isotp_receive_flowcontrol(IsoTpShims* shims, IsoTpSendHandle* handle,
     switch(get_nibble(data, 3, FLOW_CONTROL_NIBBLE_INDEX)) {
 	    case PCI_FLOW_STATUS_CONTINUE:
 		    if(data[1] == 0)
-			    handle->to_send = -1;
+				handle->to_send = -1;
 		    else
-			    handle->to_send = data[1];
+				handle->to_send = data[1];
 
-		    /* TODO separation time should not be ignored */
+		    if(data[2] <= 127) {
+			    handle->gap_ms = data[2];
+			    handle->gap_us = 0;
+		    } else {
+			    handle->gap_ms = 0;
+			    handle->gap_us = (data[2] & 0x0F) * 100;
+		    }
 		    break;
 	    case PCI_FLOW_STATUS_WAIT:
 		    handle->to_send = 0;
