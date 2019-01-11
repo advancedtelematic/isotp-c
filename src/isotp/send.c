@@ -18,8 +18,8 @@ void isotp_complete_send(IsoTpShims* shims, IsoTpMessage* message,
 IsoTpSendHandle isotp_send_single_frame(IsoTpShims* shims, IsoTpMessage* message,
         IsoTpMessageSentHandler callback) {
     IsoTpSendHandle handle = {
-        success: false,
-        completed: true
+        .success = false,
+        .completed = true
     };
 
     uint8_t can_data[CAN_MESSAGE_BYTE_SIZE] = {0};
@@ -49,8 +49,8 @@ IsoTpSendHandle isotp_send_single_frame(IsoTpShims* shims, IsoTpMessage* message
 IsoTpSendHandle isotp_send_multi_frame(IsoTpShims* shims, IsoTpMessage* message,
         IsoTpMessageSentHandler callback) {
     IsoTpSendHandle handle = {
-        success: false,
-        completed: true
+        .success = false,
+        .completed = true
     };
     uint8_t can_data[CAN_MESSAGE_BYTE_SIZE] = {0};
     if(!set_nibble(PCI_NIBBLE_INDEX, PCI_FIRST_FRAME, can_data, sizeof(can_data))) {
@@ -91,8 +91,8 @@ IsoTpSendHandle isotp_send_multi_frame(IsoTpShims* shims, IsoTpMessage* message,
 
 IsoTpMessage isotp_new_send_message(const uint16_t arbitration_id, const uint8_t payload[], uint16_t size) {
     IsoTpMessage message = {
-        arbitration_id: arbitration_id,
-        size: size
+        .arbitration_id = arbitration_id,
+        .size = size
     };
 
     memcpy(message.payload, payload, size);
