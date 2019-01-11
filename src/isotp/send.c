@@ -89,7 +89,7 @@ IsoTpSendHandle isotp_send_multi_frame(IsoTpShims* shims, IsoTpMessage* message,
     return handle;
 }
 
-IsoTpMessage isotp_new_send_message(const uint16_t arbitration_id, const uint8_t payload[], uint16_t size) {
+IsoTpMessage isotp_new_send_message(uint16_t arbitration_id, const uint8_t payload[], uint16_t size) {
     IsoTpMessage message = {
         .arbitration_id = arbitration_id,
         .size = size
@@ -107,8 +107,9 @@ IsoTpSendHandle isotp_send(IsoTpShims* shims, IsoTpMessage* message, IsoTpMessag
 }
 
 bool isotp_receive_flowcontrol(IsoTpShims* shims, IsoTpSendHandle* handle,
-        const uint16_t arbitration_id, const uint8_t data[],
-        const uint8_t size) {
+        uint16_t arbitration_id, const uint8_t data[],
+        uint8_t size) {
+    (void) arbitration_id;
 
     if(size < 3 || get_nibble(data, 3, PCI_NIBBLE_INDEX) != PCI_FLOW_CONTROL_FRAME) {
         if(shims->log) {
